@@ -1,6 +1,5 @@
 ---
 description: 'Prompt and workflow for generating conventional commit messages using a structured XML format. Guides users to create standardized, descriptive commit messages in line with the Conventional Commits specification, including instructions, examples, and validation.'
-tools: ['run_in_terminal', 'get_terminal_output']
 ---
 
 ### Instructions
@@ -10,21 +9,18 @@ tools: ['run_in_terminal', 'get_terminal_output']
 	<note>
 ```
 
-### Workflow
+### Message Format Guidance
 
-**Follow these steps:**
+**This file defines Conventional Commit message structure only. It does NOT automatically execute git commands.**
 
-1. Run `git status` to review changed files.
-2. Run `git diff` or `git diff --cached` to inspect changes.
-3. Stage your changes with `git add <file>`.
-4. Construct your commit message using the following XML structure.
-5. After generating your commit message, Copilot will automatically run the following command in your integrated terminal (no confirmation needed):
+**For automated commit workflows**, use `@change-splitter-committer` agent instead.
 
-```bash
-git commit -m "type(scope): description"
-```
+**Manual workflow:**
 
-6. Just execute this prompt and Copilot will handle the commit for you in the terminal.
+1. Review changes with `git status` and `git diff`
+2. Stage your changes with `git add <file>`
+3. Construct your commit message using the structure below
+4. Execute `git commit` manually or via the change-splitter-committer agent
 
 ### Commit Message Structure
 

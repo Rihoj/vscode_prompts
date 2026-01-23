@@ -1,5 +1,5 @@
 ---
-applyTo: '*'
+applyTo: '.github/**,**/Dockerfile,**/Dockerfile.*,**/*.dockerfile,**/docker-compose*.{yml,yaml},**/*.tf,**/azure-pipelines*.yml,**/*.pipeline.yml'
 description: 'Foundational instructions covering core DevOps principles, culture (CALMS), and key metrics (DORA) to guide GitHub Copilot in understanding and promoting effective software delivery.'
 ---
 

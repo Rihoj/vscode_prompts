@@ -1,7 +1,16 @@
 ---
 applyTo: '**/*.php'
 ---
-# Stellar-Dominion Coding Standards
+# PHP Project Coding Standards
+
+## Assumptions
+
+**This instruction file assumes a specific project structure.** Before following these guidelines:
+
+1. **Verify the directory structure exists** (e.g., `src/Controllers`, `src/Game`, `src/Security`, `template/`, `public/`)
+2. **If the structure doesn't match**, treat this as general PHP guidance only and adapt paths to the actual project layout
+3. **For greenfield projects**, you may create this structure if appropriate for the project scope
+4. **For existing projects**, always respect the current architecture and don't force restructuring
 
 ## General Standards
 - Use **PHP 8+** syntax and features to leverage modern capabilities like union types, attributes, and JIT compilation.
@@ -34,7 +43,7 @@ applyTo: '**/*.php'
 - Place all public-facing files in `public/`.
 - Store assets (CSS, JS, images) in `public/assets/`.
 - Use `template/pages/` for page templates and `template/includes/` for reusable components.
-- Use `Stellar-Dominion` as the project root directory.
+- Organize code under the project root directory following a consistent structure.
 
 ## HTML/CSS/JS
 - Use **semantic HTML5** in templates.
