@@ -10,7 +10,7 @@ tools: ['vscode', 'execute', 'read', 'edit', 'search', 'mcp_docker/git_add', 'mc
 
 ## Purpose
 
-This prompt reviews workspace changes, groups related modifications into logical commits, and generates conventional commit messages following the Conventional Commits specification with clear categorization and scope.
+Review workspace changes, group related modifications into logical commits, and generate Conventional Commit messages.
 
 ## When to Use
 
@@ -23,37 +23,25 @@ This prompt reviews workspace changes, groups related modifications into logical
 
 ## Hard Rules
 
-- **Always delegate to #code-reviewer first** — Assess all changes before splitting
+- **Never self-delegate** — Do not call `#change-splitter-committer` from this prompt
+- **Use direct analysis first** — Use git status/diff tools in this prompt
+- **Optional specialist review only** — Call `#code-reviewer` only for high-risk or very large diffs
 - **Follow Conventional Commits spec** — `type(scope): description`
 - **One logical change per commit** — No mega-commits
-- **Keep messages under 72 characters** (first line) — Enforced
+- **Keep subject line under 72 characters**
 - **Use body text for details** — Explain WHY, not WHAT
 - **Never force-push without consent** — Preserve collaboration
 - **Validate conventional format** — type must be valid (feat, fix, refactor, docs, test, chore, style, perf, ci)
-- **Total response under 500 words** (excluding delegations)
+- **Cap output size** — Max 3 proposed commits per response; summarize the rest
 
 ## Instructions
 
 1. **Identify changes**: Review staged/unstaged files in workspace
-2. **Delegate to specialists**:
-   - Call `#code-reviewer` to assess changes: "Review these changes for: ${input:focus}"
-   - Analyze impact, correctness, and logical grouping
-3. **Delegate to committer**:
-   - Call `#change-splitter-committer` to split and commit: "Create commits for: ${input:focus}"
-   - Request specific commit grouping based on review
-4. **Generate messages**: Ensure each follows Conventional Commits
-5. **Validate output**: Verify commits are atomic and well-described
-6. **Present options**: Let user review before committing
-
-## Delegation Strategy
-
-For any commit workflow, follow this sequence:
-
-| Step | Delegate To | Request |
-|------|-------------|---------|
-| Change Assessment | `#code-reviewer` | "Review these workspace changes for: ${input:focus}" |
-| Split & Organize | `#change-splitter-committer` | "Create commits for these changes with messages following Conventional Commits" |
-| Validation | User | Review proposed commits before `git commit` |
+2. **Group changes**: Create atomic commit groups by feature/fix/refactor boundary
+3. **Generate messages**: Ensure each commit follows Conventional Commits
+4. **Validate output**: Verify each group is standalone and coherent
+5. **Present options**: Let user review before committing
+6. **Escalate only when needed**: If diff is very large or risky, optionally call `#code-reviewer`
 
 ## Conventional Commits Format
 
@@ -93,139 +81,46 @@ with 7-day refresh token rotation.
 Fixes #123
 ```
 
-## Output Template (Strict Format)
+## Output Template
 
-Every response MUST follow this exact 5-section structure:
+Use this concise 4-section format:
 
 ### 1. Change Summary
-```
-Total Files Modified: [N]
-Total Insertions: [+N]
-Total Deletions: [-N]
-Key Areas Affected: [List 3-5 main areas]
-Assessment: [1-2 sentences on overall change quality]
-```
+- Files modified, insertions/deletions, key affected areas
 
-### 2. Code Review Assessment
-**Specialist Called**: `#code-reviewer`
-**Request**: "Review workspace changes for: ${input:focus}"
-**Findings**: [Key observations on correctness, impact, and logical grouping]
+### 2. Proposed Commit Groups
+- Up to 3 groups with files and rationale
+- If more than 3 groups, provide "Remaining groups (summary)"
 
-### 3. Proposed Commit Grouping
-```
-Commit 1: [type(scope): subject]
-- Files: [list affected files]
-- Rationale: [why grouped together]
+### 3. Commit Messages
+- Full message for each shown group in Conventional Commit format
 
-Commit 2: [type(scope): subject]
-- Files: [list affected files]
-- Rationale: [why grouped together]
-
-Commit N: [...]
-```
-
-### 4. Full Commit Messages
-```
-Commit 1:
-<type>(<scope>): <subject>
-<blank line>
-<body explaining why/what>
-<blank line>
-<footer if applicable>
-
----
-
-Commit 2:
-[...]
-```
-
-### 5. Next Actions
-1. Review proposed commits above
-2. Adjust grouping or messages if needed
-3. Run: `git add <files>` for each commit group
-4. Run: `git commit -m '<message>'` for each
-5. Verify: `git log --oneline -N` to see new commits
+### 4. Next Actions
+- Exact `git add` and `git commit` commands
 
 ## Example Usage
 
-**User Input**: `/commit`
+**User Input**: `/commit auth files only`
 
-**Expected Output**:
-```
-### 1. Change Summary
-Total Files Modified: 5
-Total Insertions: +145
-Total Deletions: -32
-Key Areas Affected: Authentication module, User service, API endpoints, Tests
-Assessment: Well-structured changes implementing JWT authentication with proper security 
-patterns and comprehensive test coverage.
-
-### 2. Code Review Assessment
-**Specialist Called**: #code-reviewer
-**Request**: "Review workspace changes for authentication implementation"
-**Findings**: Changes implement JWT auth correctly with HTTP-only cookies, proper error 
-handling, and comprehensive tests. No security issues identified. Changes logically separate 
-into authentication logic, service integration, and tests.
-
-### 3. Proposed Commit Grouping
-Commit 1: feat(auth): implement JWT token management
-- Files: src/auth/jwt.ts, src/auth/tokens.ts, src/types/auth.ts
-- Rationale: Core authentication logic grouped together
-
-Commit 2: feat(api): add authentication middleware
-- Files: src/middleware/auth.ts, src/api/auth.routes.ts
-- Rationale: API integration layer separate from logic
-
-Commit 3: test(auth): add JWT authentication tests
-- Files: src/auth/__tests__/jwt.test.ts, src/api/__tests__/auth.test.ts
-- Rationale: All authentication tests together
-
-### 4. Full Commit Messages
-Commit 1:
-feat(auth): implement JWT token management
-
-- Create JWT encoder/decoder with HS256 signature
-- Implement refresh token rotation (15min access, 7day refresh)
-- Add token validation and expiry checks
-- Store tokens in HTTP-only cookies for security
-
-Commit 2:
-feat(api): add authentication middleware
-
-- Add JWT verification middleware to protected routes
-- Implement error handling for missing/invalid tokens
-- Add user context injection to request object
-- Validate token claims before processing requests
-
-Commit 3:
-test(auth): add JWT authentication tests
-
-- Test token creation and validation
-- Test token refresh and expiry
-- Test middleware error handling
-- Test XSS protection with HTTP-only cookies
-
-### 5. Next Actions
-1. Review proposed commits above
-2. Run: git add src/auth/jwt.ts src/auth/tokens.ts src/types/auth.ts
-3. Run: git commit -m 'feat(auth): implement JWT token management'
-4. Run: git add src/middleware/auth.ts src/api/auth.routes.ts
-5. Run: git commit -m 'feat(api): add authentication middleware'
-```
+**Expected Behavior**:
+- Analyze only matching files
+- Propose compact commit groups
+- Output concise commit messages and commands
 
 ## Success Criteria
 
-✅ All changes reviewed by code-reviewer  
+✅ No recursive delegation  
 ✅ Commits follow Conventional Commits format exactly  
 ✅ Logical grouping makes sense (one feature/fix per commit)  
 ✅ Commit messages explain WHY changes were made  
 ✅ No files missing or duplicated across commits  
 ✅ Each commit can stand alone (buildable, testable)  
 ✅ First line is imperative mood and under 50 chars  
+✅ Output remains compact for large diffs
 
 ## Notes
 
 - Use `git diff` to preview changes before committing
 - Commits are atomic: each should build and pass tests independently
-- For very large changesets, consider multiple `/commit` sessions
+- For large changesets, split by folder or feature and run multiple `/commit` sessions
 - Conventional Commits enable automated changelog generation and semantic versioning
